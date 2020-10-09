@@ -114,13 +114,9 @@ draw_ghost(surf_g, (290, 270), 2.5, 150)
 draw_ghost(surf_g, (250, 290), 2.0, 160)
 draw_ghost(surf_g, (0, 200), 1.3, 200)
 draw_ghost(surf_g, (250, 400), 2.3, 130)
-
-
 draw_ghost(surf_g, (0, 300), 2.5, 150, True)
 draw_ghost(surf_g, (0, 350), 2.0, 160, True)
 
-
-#ghost(screen)
 
 pygame.display.update()
 clock = pygame.time.Clock()
