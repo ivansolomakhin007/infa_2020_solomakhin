@@ -18,7 +18,8 @@ CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
-username = input("Введите username: ")
+
+# username = input("Введите username: ")
 
 
 def load_image(name):
@@ -107,7 +108,7 @@ class Meteor(pygame.sprite.Sprite):
 
         self.rect.x += self.v_x
         self.rect.y += self.v_y
-        #self.v_y += 1
+        # self.v_y += 1
 
         if self.rect.y >= HEIGHT or self.rect.x >= WIDTH or self.rect.x <= 0:
             self.rect.y = HEIGHT - self.rect.y
@@ -141,9 +142,7 @@ def music(name):
 
 music("song.mp3")
 
-
 flag = False
-
 
 while not finished:
     clock.tick(FPS)
@@ -183,31 +182,51 @@ while not finished:
     seconds = (pygame.time.get_ticks() - start_ticks) / 1000
     if seconds > PLAYTIME:
         break
+
+
 # вводим имя пользователя
-# while finished:
-#     clock.tick(FPS)
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             finished = True
-#         if event.type == pygame.MOUSEBUTTONDOWN:
-#             pass
-#         if event.type == pygame.KEYDOWN:
-#             print(event.unicode)
+def user():
+    global finished
+    us = []
+    while not finished:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pass
+            if event.type == pygame.KEYDOWN:
+                if event.key == 13:
+                    # если нажали на enter то полагаем, что имя пользователя введено и сохраняем рехультат
+                    return us
+                us.append(event.unicode)
+
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 50)
+        textsurface1 = myfont.render(f'{"".join(us)}', False, (255, 255, 255))
+        screen.blit(textsurface1, (600, 300))
+        textsurface2 = myfont.render("Введите имя пользователя и нажмите Enter", False, (255, 255, 255))
+        screen.blit(textsurface2, (200, 200))
+        pygame.display.update()
+        screen.fill(BLACK)
 
 
-with open("records.txt", "r", encoding="utf-8") as f:
-    lines = f.readlines()
+u = user()
 
-with open("records.txt", "w", encoding="utf-8") as f:
-    lines.append(f"{username} {count}")
-    lines = list(map(str.strip, lines))
-    lines = list(filter(lambda x: x, lines))
-    lines = list(sorted(lines, key=lambda x: int(x.split()[1]), reverse=True))
-    print(lines)
-    if len(lines) > 10:
-        lines = lines[:10]
-    for line in lines:
-        if line.strip():
-            f.write(line + "\n")
+if not finished:
+    with open("records.txt", "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    with open("records.txt", "w", encoding="utf-8") as f:
+        lines.append(f"{''.join(u)} {count}")
+        lines = list(map(str.strip, lines))
+        lines = list(filter(lambda x: x, lines))
+        lines = list(sorted(lines, key=lambda x: int(x.split()[1]), reverse=True))
+        print(lines)
+        if len(lines) > 10:
+            lines = lines[:10]
+        for line in lines:
+            if line.strip():
+                f.write(line + "\n")
 
 pygame.quit()
