@@ -141,6 +141,7 @@ with open("records.txt", "w", encoding="utf-8") as f:
     lines.append(f"{username} {count}")
     lines.sort()
     for line in lines:
-        f.write(line + "\n")
+        if line:
+            f.write(line)
 
 pygame.quit()
