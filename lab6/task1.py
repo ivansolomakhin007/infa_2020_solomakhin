@@ -65,20 +65,32 @@ class Ball(pygame.sprite.Sprite):
 
 class Meteor(pygame.sprite.Sprite):
     """класс метеора, летит сверху, в поле тяжести. а него даем два очка"""
+    sheet = load_image("sprite sheet.png")
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.x = randint(100, 1050)
         self.y = randint(-200, -100)
-        self.v_x = randint(1, 5)
+        self.v_x = randint(-30, 30)
         self.v_y = 20
-        self.image = pygame.image.load("meteor.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.image.get_width() // 4, self.image.get_height() // 4))
-        # color = self.image.get_at((10, 10))
-        # self.image.set_colorkey(color)
-        self.image = self.image
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        self.frames = []
+        self.cut_sheet(self.sheet, 8, 8)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
         self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.frame_count = 0
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
     def click(self, mouse_pos):
         global count
@@ -88,12 +100,20 @@ class Meteor(pygame.sprite.Sprite):
             count += 2
 
     def update(self):
+        if self.frame_count % 2 == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.frame_count += 1
+        self.image = self.frames[self.cur_frame]
+
         self.rect.x += self.v_x
         self.rect.y += self.v_y
-        self.v_y += 0.5
+        #self.v_y += 1
 
-        if self.rect.y >= HEIGHT:
-            self.kill()
+        if self.rect.y >= HEIGHT or self.rect.x >= WIDTH or self.rect.x <= 0:
+            self.rect.y = HEIGHT - self.rect.y
+            self.rect.x = WIDTH - self.rect.x
+        # if abs(self.rect.x) >= WIDTH:
+        #     self.rect.x = - self.rect.x
 
 
 all_sprites = pygame.sprite.Group()
@@ -105,18 +125,41 @@ finished = False
 # подсчет о4ков
 count = 0
 
+# считаем игровое время
 start_ticks = pygame.time.get_ticks()
+PLAYTIME = 15
+
+# немного веселья
+frames_count = 0
+backgrounds = [(189, 0, 0), (44, 156, 19), (8, 124, 163), (201, 10, 198)]
+
+
+def music(name):
+    pygame.mixer.music.load(name)
+    pygame.mixer.music.play()
+
+
+music("song.mp3")
+
+
+flag = False
+
 
 while not finished:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # key = pygame.key.get_pressed()
+            # print(key)
+
             for elem in all_sprites:
                 elem.click(event.pos)
             for elem in meteors:
                 elem.click(event.pos)
+        if event.type == pygame.KEYDOWN:
+            print(event.unicode)
     if len(all_sprites) < 5:
         all_sprites.add(Ball())
     all_sprites.update()
@@ -125,23 +168,46 @@ while not finished:
         meteors.add(Meteor())
     meteors.update()
     meteors.draw(screen)
+    # отрисовываем текст
     pygame.font.init()
     myfont = pygame.font.SysFont('Comic Sans MS', 50)
-    textsurface = myfont.render(f'Ващ счет: {count}', False, (255, 255, 255))
+    textsurface = myfont.render(f'Счет: {count}', False, (255, 255, 255))
     screen.blit(textsurface, (0, 0))
     pygame.display.update()
+    # меняем фон
+    # if frames_count % 4 == 0:
+    #     color = choice(backgrounds)
+    # frames_count += 1
     screen.fill(BLACK)
+
     seconds = (pygame.time.get_ticks() - start_ticks) / 1000
-    if seconds > 10:
+    if seconds > PLAYTIME:
         break
+# вводим имя пользователя
+# while finished:
+#     clock.tick(FPS)
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             finished = True
+#         if event.type == pygame.MOUSEBUTTONDOWN:
+#             pass
+#         if event.type == pygame.KEYDOWN:
+#             print(event.unicode)
+
+
 with open("records.txt", "r", encoding="utf-8") as f:
     lines = f.readlines()
 
 with open("records.txt", "w", encoding="utf-8") as f:
     lines.append(f"{username} {count}")
-    lines.sort()
+    lines = list(map(str.strip, lines))
+    lines = list(filter(lambda x: x, lines))
+    lines = list(sorted(lines, key=lambda x: int(x.split()[1]), reverse=True))
+    print(lines)
+    if len(lines) > 10:
+        lines = lines[:10]
     for line in lines:
-        if line:
-            f.write(line)
+        if line.strip():
+            f.write(line + "\n")
 
 pygame.quit()
