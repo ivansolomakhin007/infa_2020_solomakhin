@@ -127,7 +127,7 @@ finished = False
 count = 0
 
 # считаем игровое время
-start_ticks = pygame.time.get_ticks()
+#start_ticks = pygame.time.get_ticks()
 PLAYTIME = 15
 
 # немного веселья
@@ -144,44 +144,54 @@ music("song.mp3")
 
 flag = False
 
-while not finished:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            finished = True
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            # key = pygame.key.get_pressed()
-            # print(key)
+MAX_BALLS = 5
+MAX_METEORS = 3
 
-            for elem in all_sprites:
-                elem.click(event.pos)
-            for elem in meteors:
-                elem.click(event.pos)
-        if event.type == pygame.KEYDOWN:
-            print(event.unicode)
-    if len(all_sprites) < 5:
-        all_sprites.add(Ball())
-    all_sprites.update()
-    all_sprites.draw(screen)
-    if len(meteors) < 3:
-        meteors.add(Meteor())
-    meteors.update()
-    meteors.draw(screen)
-    # отрисовываем текст
-    pygame.font.init()
-    myfont = pygame.font.SysFont('Comic Sans MS', 50)
-    textsurface = myfont.render(f'Счет: {count}', False, (255, 255, 255))
-    screen.blit(textsurface, (0, 0))
-    pygame.display.update()
-    # меняем фон
-    # if frames_count % 4 == 0:
-    #     color = choice(backgrounds)
-    # frames_count += 1
-    screen.fill(BLACK)
+def main_loop():
+    """Главный цикл"""
+    global finished, count
+    start_ticks = pygame.time.get_ticks()
+    while not finished:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # проверяем попадание по спрайту
+                for elem in all_sprites:
+                    elem.click(event.pos)
+                for elem in meteors:
+                    elem.click(event.pos)
+            if event.type == pygame.KEYDOWN:
+                print(event.unicode)
+        # контролируем количество шариков
+        if len(all_sprites) < MAX_BALLS:
+            all_sprites.add(Ball())
+        all_sprites.update()
+        all_sprites.draw(screen)
+        if len(meteors) < MAX_METEORS:
+            meteors.add(Meteor())
+        meteors.update()
+        meteors.draw(screen)
+        # отрисовываем текст
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 50)
+        textsurface = myfont.render(f'Счет: {count}', False, (255, 255, 255))
+        screen.blit(textsurface, (0, 0))
+        pygame.display.update()
+        # меняем фон
+        # if frames_count % 4 == 0:
+        #     color = choice(backgrounds)
+        # frames_count += 1
+        screen.fill(BLACK)
 
-    seconds = (pygame.time.get_ticks() - start_ticks) / 1000
-    if seconds > PLAYTIME:
-        break
+        seconds = (pygame.time.get_ticks() - start_ticks) / 1000
+        if seconds > PLAYTIME:
+            user()
+            count = 0
+            break
+
+#main_loop()
 
 
 # вводим имя пользователя
@@ -198,7 +208,8 @@ def user():
             if event.type == pygame.KEYDOWN:
                 if event.key == 13:
                     # если нажали на enter то полагаем, что имя пользователя введено и сохраняем рехультат
-                    return us
+                    save(us)
+                    return
                 us.append(event.unicode)
 
         pygame.font.init()
@@ -211,22 +222,50 @@ def user():
         screen.fill(BLACK)
 
 
-u = user()
+#u = user()
 
-if not finished:
-    with open("records.txt", "r", encoding="utf-8") as f:
-        lines = f.readlines()
+def save(userrr):
+    if not finished:
+        with open("records.txt", "r", encoding="utf-8") as f:
+            lines = f.readlines()
 
-    with open("records.txt", "w", encoding="utf-8") as f:
-        lines.append(f"{''.join(u)} {count}")
-        lines = list(map(str.strip, lines))
-        lines = list(filter(lambda x: x, lines))
-        lines = list(sorted(lines, key=lambda x: int(x.split()[1]), reverse=True))
-        print(lines)
-        if len(lines) > 10:
-            lines = lines[:10]
-        for line in lines:
-            if line.strip():
-                f.write(line + "\n")
+        with open("records.txt", "w", encoding="utf-8") as f:
+            lines.append(f"{''.join(userrr)} {count}")
+            lines = list(map(str.strip, lines))
+            lines = list(filter(lambda x: x, lines))
+            lines = list(sorted(lines, key=lambda x: int(x.split()[1]), reverse=True))
+            print(lines)
+            if len(lines) > 10:
+                lines = lines[:10]
+            for line in lines:
+                if line.strip():
+                    f.write(line + "\n")
+
+def main_menu():
+    global finished
+    while not finished:
+        clock.tick(FPS)
+        pos = (0, 0)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = event.pos
+        rect(screen, (0, 0, 0), (400, 250, 400, 50))
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 50)
+        textsurface = myfont.render('Играть', False, (255, 255, 255))
+        screen.blit(textsurface, (400, 250))
+        #rect(screen, (0, 0, 0), (400, 250, 400, 50))
+        if 400 <= pos[0] <= 800 and 250 <= pos[1] <= 300:
+            main_loop()
+        pygame.display.update()
+        # меняем фон
+        # if frames_count % 4 == 0:
+        #     color = choice(backgrounds)
+        # frames_count += 1
+        screen.fill(BLACK)
+
+main_menu()
 
 pygame.quit()
