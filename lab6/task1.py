@@ -19,9 +19,6 @@ BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 
-# username = input("Введите username: ")
-
-
 def load_image(name):
     return pygame.image.load(name)
 
@@ -105,16 +102,12 @@ class Meteor(pygame.sprite.Sprite):
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.frame_count += 1
         self.image = self.frames[self.cur_frame]
-
         self.rect.x += self.v_x
         self.rect.y += self.v_y
-        # self.v_y += 1
 
         if self.rect.y >= HEIGHT or self.rect.x >= WIDTH or self.rect.x <= 0:
             self.rect.y = HEIGHT - self.rect.y
             self.rect.x = WIDTH - self.rect.x
-        # if abs(self.rect.x) >= WIDTH:
-        #     self.rect.x = - self.rect.x
 
 
 all_sprites = pygame.sprite.Group()
@@ -127,7 +120,6 @@ finished = False
 count = 0
 
 # считаем игровое время
-#start_ticks = pygame.time.get_ticks()
 PLAYTIME = 15
 
 # немного веселья
@@ -147,9 +139,10 @@ flag = False
 MAX_BALLS = 5
 MAX_METEORS = 3
 
+
 def main_loop():
     """Главный цикл"""
-    global finished, count
+    global finished, count, backgrounds, frames_count
     start_ticks = pygame.time.get_ticks()
     while not finished:
         clock.tick(FPS)
@@ -180,18 +173,17 @@ def main_loop():
         screen.blit(textsurface, (0, 0))
         pygame.display.update()
         # меняем фон
-        # if frames_count % 4 == 0:
-        #     color = choice(backgrounds)
-        # frames_count += 1
-        screen.fill(BLACK)
+
+        if frames_count % 4 == 0:
+            color = choice(backgrounds)
+        frames_count += 1
+        screen.fill(color)
 
         seconds = (pygame.time.get_ticks() - start_ticks) / 1000
         if seconds > PLAYTIME:
             user()
             count = 0
             break
-
-#main_loop()
 
 
 # вводим имя пользователя
@@ -217,12 +209,10 @@ def user():
         textsurface1 = myfont.render(f'{"".join(us)}', False, (255, 255, 255))
         screen.blit(textsurface1, (600, 300))
         textsurface2 = myfont.render("Введите имя пользователя и нажмите Enter", False, (255, 255, 255))
-        screen.blit(textsurface2, (200, 200))
+        screen.blit(textsurface2, (100, 200))
         pygame.display.update()
         screen.fill(BLACK)
 
-
-#u = user()
 
 def save(userrr):
     if not finished:
@@ -241,6 +231,7 @@ def save(userrr):
                 if line.strip():
                     f.write(line + "\n")
 
+
 def main_menu():
     global finished
     while not finished:
@@ -256,15 +247,11 @@ def main_menu():
         myfont = pygame.font.SysFont('Comic Sans MS', 50)
         textsurface = myfont.render('Играть', False, (255, 255, 255))
         screen.blit(textsurface, (400, 250))
-        #rect(screen, (0, 0, 0), (400, 250, 400, 50))
         if 400 <= pos[0] <= 800 and 250 <= pos[1] <= 300:
             main_loop()
         pygame.display.update()
-        # меняем фон
-        # if frames_count % 4 == 0:
-        #     color = choice(backgrounds)
-        # frames_count += 1
         screen.fill(BLACK)
+
 
 main_menu()
 
