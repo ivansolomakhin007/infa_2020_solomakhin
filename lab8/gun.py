@@ -160,6 +160,13 @@ class target():
         ###
         # canv.itemconfig(self.id_points, text=self.points)
 
+    def move(self):
+        self.v_x = rnd(-10, +10)
+        self.v_y = ((-1)**(choice([1, 2]))) * (100 - self.v_x ** 2)**0.5
+        self.x += self.v_x
+        self.y += self.v_y
+        canv.coords(self.id, self.x - self.r, self.y - self.r, self.x + self.r, self.y + self.r)
+
 
 t1 = target()
 t2 = target()
@@ -181,6 +188,8 @@ def new_game(event=''):
     canv.itemconfig(screen2, text='')
 
 
+    # t1.new_target()
+    # t2.new_target()
     t1.new_target()
     t2.new_target()
     ###
@@ -227,6 +236,8 @@ def new_game(event=''):
                 # canv.itemconfig(screen1,
                 # text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов\nДля рестарта нажмити Enter')
             canv.itemconfig(screen2, text=(t1.points + t2.points))
+            t1.move()
+            t2.move()
 
         if t1.live == 0 and t2.live == 0:
             canv.delete(g1.id)
@@ -235,7 +246,7 @@ def new_game(event=''):
             canv.bind('<ButtonRelease-1>', '')
             print("aaaaaaaaaaaaaaaaaaa")
             canv.itemconfig(screen1,
-                            text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов\nДля рестарта нажмити Enter')
+                            text='Вы уничтожили цели за ' + str(bullet) + ' выстрелов')
             ###
             #canv.delete("all")
 
