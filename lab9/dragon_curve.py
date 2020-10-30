@@ -20,7 +20,8 @@ def next_generation(c):
     return str("".join(c))
 
 
-for i in range(14):
+n = 14
+for i in range(n):
     circuit = next_generation(circuit)
     print(i)
 
