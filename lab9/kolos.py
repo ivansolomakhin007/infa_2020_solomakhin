@@ -1,8 +1,14 @@
 import turtle
+from random import randint, choice
 
 turtle.shape('turtle')
+turtle.forward(-300)
 turtle.speed(10)
 turtle.tracer(False)
+
+def randomise():
+    s = ["+", "−"]
+    return f"F{choice(s)}[[X]{choice(s)}X]{choice(s)}F[{choice(s)}FX]{choice(s)}X"
 
 # создаем грамматику
 circuit = "FX"
@@ -29,7 +35,10 @@ class Stack:
 def next_generation(c):
     c = list(c)
     for i in range(len(c)):
-        c[i] = rules[c[i]]
+        if c[i] != "X":
+            c[i] = rules[c[i]]
+        else:
+            c[i] = randomise()
     return str("".join(c))
 
 
@@ -46,11 +55,11 @@ def forward():
 
 
 def right():
-    turtle.right(25)
+    turtle.right(randint(5, 30))
 
 
 def left():
-    turtle.left(25)
+    turtle.left(randint(5, 30))
 
 def save():
     x, y = turtle.pos()
@@ -76,5 +85,7 @@ moves = {"F": forward,
 
 for elem in circuit:
     moves[elem]()
+
+
 
 turtle.exitonclick()
